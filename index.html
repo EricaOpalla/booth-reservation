@@ -5,71 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booth Reservation</title>
     <style>
-        body { text-align: center; font-family: Arial, sans-serif; }
-        .layout { display: grid; grid-template-columns: repeat(5, 100px); grid-gap: 10px; justify-content: center; }
-        .booth { width: 80px; height: 80px; border: 2px solid black; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .selected { background-color: green; color: white; }
-        .taken { background-color: red; color: white; pointer-events: none; }
-        .buttons { margin-top: 20px; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+        .layout {
+            position: relative;
+            width: 600px;
+            height: 700px;
+            background: white;
+            border: 2px solid black;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .booth {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: lightgreen;
+            text-align: center;
+            line-height: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid black;
+        }
+        .selected {
+            background-color: red !important;
+            cursor: not-allowed;
+        }
+        .loading-bay, .pathway {
+            position: absolute;
+            font-weight: bold;
+        }
+        .loading-bay { top: 20px; left: 50%; transform: translateX(-50%); }
+        .pathway { right: 20px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+        .confirm-btn {
+            position: absolute;
+            bottom: 10px;
+            padding: 10px;
+            background: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <h2>Booth Reservation</h2>
-    <div class="layout" id="booth-layout">
-        <!-- Booths will be generated dynamically here -->
-    </div>
-    <div class="buttons">
-        <button onclick="confirmSelection()">Confirm</button>
-        <button onclick="exitPage()">Exit</button>
-    </div>
+    <div class="layout">
+        <div class="loading-bay">LOADING BAY</div>
+        <div class="pathway">PATHWAY</div>
+        <button class="confirm-btn" onclick="confirmSelection()">Confirm Selection</button>
+        
+        <script>
+            const booths = [
+                { id: 'F1', x: 500, y: 100 }, { id: 'F2', x: 500, y: 200 },
+                { id: 'F3', x: 500, y: 300 }, { id: 'F4', x: 500, y: 400 },
+                { id: 'F5', x: 500, y: 500 }, { id: 'F6', x: 500, y: 600 },
+                { id: 'F7', x: 300, y: 650 }, { id: 'F8', x: 250, y: 650 },
+                { id: 'F9', x: 200, y: 650 }, { id: 'F10', x: 100, y: 500 },
+                { id: 'F11', x: 100, y: 400 }, { id: 'F12', x: 100, y: 300 },
+                { id: 'F13', x: 100, y: 200 }, { id: 'F14', x: 250, y: 100 },
+                { id: 'F15', x: 350, y: 100 }
+            ];
 
-    <script>
-        const booths = ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15"];
-        let selectedBooth = null;
-        let takenBooths = new Set();
+            let selectedBooth = null;
 
-        function renderBooths() {
-            const layout = document.getElementById("booth-layout");
-            layout.innerHTML = "";
             booths.forEach(booth => {
-                const div = document.createElement("div");
-                div.classList.add("booth");
-                div.textContent = booth;
-                div.id = booth;
-                if (takenBooths.has(booth)) {
-                    div.classList.add("taken");
-                } else {
-                    div.onclick = () => selectBooth(booth);
-                }
-                layout.appendChild(div);
+                const div = document.createElement('div');
+                div.classList.add('booth');
+                div.id = booth.id;
+                div.innerText = booth.id;
+                div.style.left = `${booth.x}px`;
+                div.style.top = `${booth.y}px`;
+                div.addEventListener('click', () => selectBooth(div));
+                document.querySelector('.layout').appendChild(div);
             });
-        }
 
-        function selectBooth(booth) {
-            if (selectedBooth) {
-                document.getElementById(selectedBooth).classList.remove("selected");
+            function selectBooth(booth) {
+                if (booth.classList.contains('selected')) return;
+                if (selectedBooth) selectedBooth.classList.remove('selected');
+                selectedBooth = booth;
+                selectedBooth.classList.add('selected');
             }
-            selectedBooth = booth;
-            document.getElementById(booth).classList.add("selected");
-        }
 
-        function confirmSelection() {
-            if (!selectedBooth) {
-                alert("Please select a booth first!");
-                return;
+            function confirmSelection() {
+                if (!selectedBooth) {
+                    alert("Please select a booth first!");
+                    return;
+                }
+                selectedBooth.style.backgroundColor = 'red';
+                selectedBooth.classList.add('selected');
+                selectedBooth.removeEventListener('click', () => selectBooth(selectedBooth));
+                alert(`You have reserved ${selectedBooth.id}`);
             }
-            takenBooths.add(selectedBooth);
-            alert("You have selected " + selectedBooth);
-            selectedBooth = null;
-            renderBooths();
-        }
-
-        function exitPage() {
-            window.close();
-        }
-
-        renderBooths();
-    </script>
+        </script>
+    </div>
 </body>
 </html>
 
