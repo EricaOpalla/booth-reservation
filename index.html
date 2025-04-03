@@ -6,58 +6,70 @@
     <title>Booth Reservation</title>
     <style>
         body { text-align: center; font-family: Arial, sans-serif; }
-        .booth-container { display: grid; grid-template-columns: repeat(5, 100px); gap: 10px; justify-content: center; }
-        .booth { width: 100px; height: 50px; background: lightgray; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid black; }
-        .selected { background: green; color: white; }
-        .reserved { background: red; pointer-events: none; }
+        .layout { display: grid; grid-template-columns: repeat(5, 100px); grid-gap: 10px; justify-content: center; }
+        .booth { width: 80px; height: 80px; border: 2px solid black; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .selected { background-color: green; color: white; }
+        .taken { background-color: red; color: white; pointer-events: none; }
+        .buttons { margin-top: 20px; }
     </style>
 </head>
 <body>
-    <h2>Select a Booth</h2>
-    <div class="booth-container" id="booth-container"></div>
-    <p id="selected-booth">Selected Booth: None</p>
-    <button onclick="submitReservation()">Confirm Selection</button>
+    <h2>Booth Reservation</h2>
+    <div class="layout" id="booth-layout">
+        <!-- Booths will be generated dynamically here -->
+    </div>
+    <div class="buttons">
+        <button onclick="confirmSelection()">Confirm</button>
+        <button onclick="exitPage()">Exit</button>
+    </div>
 
     <script>
         const booths = ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15"];
         let selectedBooth = null;
-        const reservedBooths = [];
-        
+        let takenBooths = new Set();
+
         function renderBooths() {
-            const container = document.getElementById("booth-container");
-            container.innerHTML = "";
+            const layout = document.getElementById("booth-layout");
+            layout.innerHTML = "";
             booths.forEach(booth => {
                 const div = document.createElement("div");
                 div.classList.add("booth");
-                div.innerText = booth;
-                if (reservedBooths.includes(booth)) div.classList.add("reserved");
-                div.onclick = () => selectBooth(booth, div);
-                container.appendChild(div);
+                div.textContent = booth;
+                div.id = booth;
+                if (takenBooths.has(booth)) {
+                    div.classList.add("taken");
+                } else {
+                    div.onclick = () => selectBooth(booth);
+                }
+                layout.appendChild(div);
             });
         }
 
-        function selectBooth(booth, element) {
-            if (reservedBooths.includes(booth)) return;
-            document.querySelectorAll(".booth").forEach(el => el.classList.remove("selected"));
-            element.classList.add("selected");
+        function selectBooth(booth) {
+            if (selectedBooth) {
+                document.getElementById(selectedBooth).classList.remove("selected");
+            }
             selectedBooth = booth;
-            document.getElementById("selected-booth").innerText = `Selected Booth: ${booth}`;
+            document.getElementById(booth).classList.add("selected");
         }
 
-        function submitReservation() {
+        function confirmSelection() {
             if (!selectedBooth) {
-                alert("Please select a booth first.");
+                alert("Please select a booth first!");
                 return;
             }
-            alert(`Booth ${selectedBooth} reserved!`);
-            reservedBooths.push(selectedBooth);
+            takenBooths.add(selectedBooth);
+            alert("You have selected " + selectedBooth);
             selectedBooth = null;
-            document.getElementById("selected-booth").innerText = "Selected Booth: None";
             renderBooths();
         }
-        
+
+        function exitPage() {
+            window.close();
+        }
+
         renderBooths();
     </script>
 </body>
 </html>
- 
+
